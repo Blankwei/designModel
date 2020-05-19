@@ -4,12 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.savoidage</groupId>
     <artifactId>design</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>design</name>
     <packaging>pom</packaging>
     <description>Demo project for Spring Boot</description>
 
     <modules>
-        <module>factory_mothod</module>
+        <module>simplefactory</module>
+        <module>methodfactory</module>
     </modules>
 </project>
