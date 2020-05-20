@@ -9,7 +9,7 @@
 
 ### 模式结构：
 ![Image text](https://raw.githubusercontent.com/Blankwei/folder/master/simple_factory_uml.png)
-![Image text](https://raw.githubusercontent.com/hongmaju/light7Local/master/img/productShow/20170518152848.png)
+[baidu]:http://www.baidu.com/img/bdlogo.gif 
 
 ### 具体实例：
 创建父类
