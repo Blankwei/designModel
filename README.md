@@ -10,8 +10,6 @@
 ### 模式结构：
 ![image](https://raw.githubusercontent.com/Blankwei/folder/master/simple_factory_uml.png)
 
- ![image](https://github.com/ButBueatiful/dotvim/raw/master/screenshots/vim-screenshot.jpg)
-
 ### 具体实例：
 创建父类
 ```
