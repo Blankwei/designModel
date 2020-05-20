@@ -8,7 +8,7 @@
 实质是由一个工厂类根据传入的参数，动态决定应该创建哪一个产品类（这些产品类继承自一个父类或接口）的实例。简单工厂模式的创建目标，所有创建的对象都是充当这个角色的某个具体类的实例。
 
 ### 模式结构：
-![add image](https://raw.githubusercontent.com/Blankwei/folder/master/simple_factory_uml.png)
+![add image](https://github.com/Blankwei/folder/master/simple_factory_uml.png)
 
 ### 具体实例：
 创建父类
