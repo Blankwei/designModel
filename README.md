@@ -226,3 +226,83 @@ public class Main {
     }
 }
 ```
+
+## 4.策略模式
+
+### 定义：
+是指，定义一组算法，并把其封装到一个对象中。然后在运行时，可以灵活的使用其中的一个算法。本模式使得算法可独立于使用它的客户而变化。
+
+### 模式结构：（参考以下）
+![Image](https://raw.githubusercontent.com/Blankwei/folder/master/strategy.png)
+
+
+### 具体实例：
+上下文切换
+```
+public class DiscountContext {
+
+    // 持有某个策略
+    private DiscountStrategy strategy;
+
+    // 设置新策略
+    public void setStrategy(DiscountStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void excute(BigDecimal total){
+        System.out.println("金额：" + strategy.getPrice(total));
+    }
+}
+```
+抽象策略
+```
+public interface DiscountStrategy {
+
+    // 满足于各种打折如八折、五折、一折、满减等活动
+    // 计算打折后的价格
+    BigDecimal getPrice(BigDecimal total);
+}
+```
+
+具体策略：八折
+```
+public class BazheStrategy implements DiscountStrategy {
+
+    @Override
+    public BigDecimal getPrice(BigDecimal total) {
+        System.out.println("此次账单打八折：");
+        // 设置八折并四舍五入保留两位小数
+        return total.multiply(new BigDecimal("0.8").setScale(2,RoundingMode.HALF_UP));
+    }
+}
+
+```
+具体策略：满减
+```
+public class FullDecrementStrategy implements DiscountStrategy{
+
+    @Override
+    public BigDecimal getPrice(BigDecimal total) {
+        System.out.println("此次账单满200减20: ");
+        // 满200减20
+        return total.compareTo(BigDecimal.valueOf(200)) >= 0 ? total.subtract(BigDecimal.valueOf(20)).setScale(2) : total;
+    }
+}
+```
+创建一个测试函数
+```
+public class Main {
+
+    public static void main(String[] args) {
+        DiscountContext context = new DiscountContext();
+        // 八折
+        context.setStrategy(new BazheStrategy());
+        context.excute(new BigDecimal(180));
+
+        // 满减
+        context.setStrategy(new FullDecrementStrategy());
+        context.excute(new BigDecimal(250));
+    }
+}
+
+```
