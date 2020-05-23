@@ -10,7 +10,9 @@
     <description>Demo project for Spring Boot</description>
 
     <modules>
-        <module>simplefactory</module>
+        <module>abstractfactory</module>
         <module>methodfactory</module>
+        <module>simplefactory</module>
+        <module>strategy</module>
     </modules>
 </project>

@@ -306,3 +306,189 @@ public class Main {
 }
 
 ```
+
+## 5.单例模式
+
+### 定义：
+单例模式（Singleton）的目的是为了保证在一个进程中，某个类有且仅有一个实例。
+
+### 单例模式的六种实现方式：
+* 懒汉式
+* 饿汉式
+* 加锁的懒汉式
+* 双重加锁懒汉式
+* 内部静态类实现的懒汉式
+* 枚举
+
+### 具体实例：
+
+#### 懒汉式：
+```
+public class LazySingleton {
+
+    private static LazySingleton INSTANCE = null;
+
+    /**
+     * 私有构造方法(防止外部通过new创建对象)
+     */
+    private LazySingleton(){
+
+    }
+
+    /**
+     * 懒汉式单例模式
+     * @return
+     */
+    public static LazySingleton getInstance(){
+        if(null == INSTANCE){
+            // 当为空时 在类内部通过new创建实例
+            INSTANCE = new LazySingleton();
+        }
+        return INSTANCE;
+    }
+}
+```
+#### 懒汉式优缺点以及适用场景：  
+优点：单例对象是在应用需要时才去构造，可以提高应用的启动速度。  
+缺点：不是*线程安全*的,多线程同时调用getInstance方法，有可能会生成多个单例对象。  
+适用场景：单例对象功能复杂，占用内存大，对应用的启动速度有要求。  
+不适用：多线程条件。  
+
+#### 饿汉式：
+```
+public class HungrySingleton {
+
+    private static HungrySingleton INSTANCE = new HungrySingleton();
+
+    /**
+     * 私有构造方法(防止外部通过new创建对象)
+     */
+    private HungrySingleton(){
+
+    }
+
+    /**
+     * 饿汉式单例模式
+     * @return
+     */
+    public static HungrySingleton getInstance(){
+        return INSTANCE;
+    }
+}
+```
+#### 饿汉式优缺点以及适用场景：  
+优点：简单方便。  
+缺点：不管程序中是否使用到了单例对象，都会生成单例对象，并且由于静态对象是在类加载时就需要生成，会降低应用的启动速度。  
+适用场景：类对象功能简单，占用内存小，使用频繁。  
+不适用：类对象复杂，占用内存大，使用概率低。  
+
+#### 同步方法的懒汉式：
+```
+public class SyncSingleton {
+
+    private static SyncSingleton singleton;
+
+    /**
+     * 私有构造方法(防止外部通过new创建对象)
+     */
+    private SyncSingleton(){
+
+    }
+
+    /**
+     * 带有同步方法的懒汉式单例
+     * @return
+     */
+    public static synchronized SyncSingleton getInstance(){
+        if(null == singleton){
+            singleton = new SyncSingleton();
+        }
+        return singleton;
+    }
+}
+
+```
+#### 同步懒汉式优缺点以及适用场景：  
+优点：同懒汉式。  
+缺点：加锁有了额外的消耗。
+
+#### 双重检查懒汉式：
+```
+public class DoubleCheckLockSingleton {
+
+    private static DoubleCheckLockSingleton singleton = null;
+
+    private static final Byte[] bytes = new Byte[0];
+
+    /**
+     * 私有构造方法(防止外部通过new创建对象)
+     */
+    private DoubleCheckLockSingleton(){
+
+    }
+
+    /**
+     * 双重效验+锁模式
+     * @return
+     */
+    public static DoubleCheckLockSingleton getInstance(){
+        if(null == singleton){
+            // 锁字节 提升效率
+            synchronized(bytes){
+                if(null == singleton){
+                    singleton = new DoubleCheckLockSingleton();
+                }
+            }
+        }
+        return singleton;
+    }
+}
+```
+#### 双重检查懒汉式优缺点以及适用场景：  
+优点：懒加载、线程安全、效率高。  
+缺点：代码设计复杂。 
+
+#### 静态内部类：
+```
+public class StaticInnerSingleton {
+
+    /**
+     * 私有构造方法(防止外部通过new创建对象)
+     */
+    private StaticInnerSingleton(){
+
+    }
+
+    /**
+     * 内部静态类
+     */
+    private static class SingletonInstance{
+        private static final StaticInnerSingleton SINGLETON = new StaticInnerSingleton();
+    }
+
+    /**
+     * 内部静态实例获取
+     * @return
+     */
+    public static StaticInnerSingleton getInstance(){
+        return SingletonInstance.SINGLETON;
+    }
+}
+
+```
+#### 静态内部类优缺点以及适用场景：  
+优点：实现简单、懒加载、线程安全。  
+
+#### 枚举类：
+```
+public enum EnumSingleton {
+
+    /**
+     * 枚举实例
+     */
+    SINGLETON
+}
+```
+#### 枚举类优缺点以及适用场景：  
+优点：线程安全，不担心序列化和反射问题。  
+缺点：枚举占用的内存会多一点。
