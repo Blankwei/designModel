@@ -153,8 +153,6 @@ public class Main {
 ### 定义：
 是一种为访问类提供一个创建一组相关或相互依赖对象的接口，且访问类无须指定所要产品的具体类就能得到同族的不同等级的产品的模式结构。
 
-### 模式结构：（参考以下）
-![Image]()
 
 工厂方法模式的主要角色如下：
 
@@ -492,3 +490,134 @@ public enum EnumSingleton {
 #### 枚举类优缺点以及适用场景：  
 优点：线程安全，不担心序列化和反射问题。  
 缺点：枚举占用的内存会多一点。
+
+## 6.原型模式
+
+### 定义：
+是用于创建重复的对象，同时又能保证性能。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。
+
+### 模式结构：（参考以下）
+![Image](https://raw.githubusercontent.com/Blankwei/folder/master/propotype.jpg)
+
+
+### 具体实例：
+创建一个实现了 Cloneable 接口的抽象类
+```
+public abstract class ClassInfo implements Cloneable{
+
+    private String id;
+
+    protected String classType;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getClassType(){
+        return classType;
+    }
+
+    abstract void print();
+
+    @Override
+    public Object clone(){
+        Object clone = null;
+        try {
+            clone = super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return clone;
+    }
+
+}
+```
+创建扩展实体类
+```
+/**
+ * Author: created by savoidage
+ * CreateTime: 2020-08-14 15:49
+ * Description: 智慧班
+ */
+@Slf4j
+public class WisdomClass extends ClassInfo {
+
+    public WisdomClass(){
+        classType = "wisdom";
+    }
+
+    @Override
+    public void print() {
+        log.info("excute wisdom::print() method...");
+    }
+
+}
+```
+```
+/**
+ * Author: created by savoidage
+ * CreateTime: 2020-08-14 15:52
+ * Description: 长期班
+ */
+@Slf4j
+public class LongTermClass extends ClassInfo{
+
+    public LongTermClass(){
+        classType = "long-term";
+    }
+
+    @Override
+    public void print() {
+        log.info("excute longTerm::print() method...");
+    }
+}
+```
+创建一个类，把扩展类存储至Hashtable中
+```
+public class ClassInfoPrototype {
+
+    private static Hashtable<String,ClassInfo> classInfoHashtable = new Hashtable<>();
+
+    public static ClassInfo getClassInfo(String id){
+        ClassInfo classInfo = classInfoHashtable.get(id);
+        return (ClassInfo) classInfo.clone();
+    }
+
+    // 默认添加班级类型
+    public static void loadCache(){
+        WisdomClass wisdomClass = new WisdomClass();
+        wisdomClass.setId("1");
+        classInfoHashtable.put(wisdomClass.getId(),wisdomClass);
+
+        LongTermClass longTermClass = new LongTermClass();
+        longTermClass.setId("2");
+        classInfoHashtable.put(longTermClass.getId(),longTermClass);
+    }
+}
+```
+创建一个测试函数
+```
+@Slf4j
+public class Main {
+
+    public static void main(String[] args) {
+        // 加载数据
+        ClassInfoPrototype.loadCache();
+
+        ClassInfo wisdomClassInfo = ClassInfoPrototype.getClassInfo("1");
+        log.info("classInfo: " + wisdomClassInfo.getClassType());
+
+        ClassInfo longTermClassInfo = ClassInfoPrototype.getClassInfo("2");
+        log.info("classInfo: " + longTermClassInfo.getClassType());
+    }
+}
+```
+打印结果:
+```
+16:29:47.747 [main] INFO com.savoidage.designmodel.prototype.example.Main - classInfo: wisdom
+16:29:47.761 [main] INFO com.savoidage.designmodel.prototype.example.Main - classInfo: long-term
+```

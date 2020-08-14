@@ -14,5 +14,7 @@
         <module>methodfactory</module>
         <module>simplefactory</module>
         <module>strategy</module>
+        <module>singleton</module>
+        <module>prototype</module>
     </modules>
 </project>
