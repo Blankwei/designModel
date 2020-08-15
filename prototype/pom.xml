@@ -8,10 +8,10 @@
         <version>2.1.14.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.savoidage</groupId>
-    <artifactId>designmodel</artifactId>
+    <groupId>com.savoidage.designmodel</groupId>
+    <artifactId>propotype</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>designmodel</name>
+    <name>propotype</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
