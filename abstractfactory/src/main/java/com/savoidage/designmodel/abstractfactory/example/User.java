@@ -5,5 +5,8 @@ package com.savoidage.designmodel.abstractfactory.example;
  * CreateTime: 2020-05-19 17:53
  * Description: user表
  */
+
 public class User {
+
+
 }
