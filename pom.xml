@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.savoidage</groupId>
-    <artifactId>design</artifactId>
+    <groupId>com.savoidage.designmodel</groupId>
+    <artifactId>designPatten</artifactId>
     <version>1.0.0</version>
     <name>design</name>
     <packaging>pom</packaging>
@@ -16,5 +16,6 @@
         <module>strategy</module>
         <module>singleton</module>
         <module>prototype</module>
+        <module>observer</module>
     </modules>
 </project>
