@@ -24,12 +24,12 @@ public class Subject {
     }
 
     // 添加observer
-    public void attach(Observer observer){
+    public void attach(Observer observer) {
         observers.add(observer);
     }
 
     // 通知所有observer
-    public void notifyAllObservers(){
+    public void notifyAllObservers() {
         observers.forEach(Observer::update);
     }
 }

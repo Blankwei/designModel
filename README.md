@@ -620,3 +620,89 @@ public class Main {
 16:29:47.747 [main] INFO com.savoidage.designmodel.prototype.example.Main - classInfo: wisdom
 16:29:47.761 [main] INFO com.savoidage.designmodel.prototype.example.Main - classInfo: long-term
 ```
+
+
+## 7.观察者模式
+
+### 定义：
+定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。
+
+### 模式结构：（参考以下）
+![Image](https://raw.githubusercontent.com/Blankwei/folder/master/oberver.jpg)
+
+
+### 具体实例：
+创建一个subject类
+```
+public class Subject {
+
+    private List<Observer> observers = new ArrayList<>();
+
+    private int state;
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+        notifyAllObservers();
+    }
+
+    // 添加observer
+    public void attach(Observer observer) {
+        observers.add(observer);
+    }
+
+    // 通知所有observer
+    public void notifyAllObservers() {
+        observers.forEach(Observer::update);
+    }
+}
+
+```
+创建扩展Observer类
+```
+public abstract class Observer {
+
+    protected Subject subject;
+
+    public abstract void update();
+}
+```
+创建具体被观察者类实现抽象observer
+```
+@Slf4j
+public class Service1Observer extends Observer {
+
+    public Service1Observer(Subject subject) {
+        this.subject = subject;
+        this.subject.attach(this);
+    }
+
+    @Override
+    public void update() {
+        log.info("Service1Observer : " + subject.getState());
+    }
+}
+```
+创建一个测试函数
+```
+public class Main {
+    public static void main(String[] args) {
+        Subject subject = new Subject();
+
+        new Service1Observer(subject);
+        new Service2Observer(subject);
+        new Service3Observer(subject);
+
+        System.out.println("state being setted: 11");
+        subject.setState(11);
+
+        System.out.println("then state being changed: 13");
+        subject.setState(13);
+
+    }
+}
+
+```
