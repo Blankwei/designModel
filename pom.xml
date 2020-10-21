@@ -17,5 +17,6 @@
         <module>singleton</module>
         <module>prototype</module>
         <module>observer</module>
+        <module>proxy</module>
     </modules>
 </project>

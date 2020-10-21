@@ -706,3 +706,90 @@ public class Main {
 }
 
 ```
+
+## 8.代理模式
+
+### 定义：
+由于某些原因需要给某对象提供一个代理以控制对该对象的访问。这时，访问对象不适合或者不能直接引用目标对象，代理对象作为访问对象和目标对象之间的中介。
+### 模式结构：（参考以下）
+![Image](https://raw.githubusercontent.com/Blankwei/folder/master/)
+
+
+### 具体实例：
+创建一个Image接口
+```
+public interface Image {
+
+    void display();
+}
+
+```
+创建RealImage类继承image接口
+```
+public class RealImage implements Image{
+
+    private String fileName;
+
+    public RealImage(String fileName){
+        this.fileName = fileName;
+        loadFromDisk(fileName);
+    }
+
+    @Override
+    public void display() {
+        System.out.println("Displaying " + fileName);
+    }
+
+    private void loadFromDisk(String fileName){
+        System.out.println("Loading " + fileName);
+    }
+}
+
+```
+创建ProxyImage类
+```
+public class ProxyImage implements Image{
+
+    private RealImage realImage;
+    private String fileName;
+
+    public ProxyImage(String fileName){
+        this.fileName = fileName;
+    }
+
+    @Override
+    public void display() {
+        if(realImage == null){
+            realImage = new RealImage(fileName);
+        }
+        realImage.display();
+    }
+}
+
+```
+创建一个测试函数
+```
+public class Main {
+
+    public static void main(String[] args) {
+        Image image = new ProxyImage("1111.jpg");
+
+        // 图像将从磁盘加载
+        image.display();
+        System.out.println("");
+        // 图像不需要从磁盘加载
+        image.display();
+    }
+}
+
+```
+
+输出结果
+
+```
+Loading 1111.jpg
+Displaying t1111.jpg
+
+Displaying 1111.jpg
+
+```
