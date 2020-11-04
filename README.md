@@ -793,3 +793,263 @@ Displaying t1111.jpg
 Displaying 1111.jpg
 
 ```
+
+## 9.状态模式
+
+### 定义：
+当一个对象的内在状态改变时允许改变其行为，这个对象看起来像是改变了其类。
+### 模式结构：（参考以下）
+![Image](https://raw.githubusercontent.com/Blankwei/folder/master/)
+
+
+### 具体实例：
+创建一个state抽象类
+```
+public abstract class State {
+
+    /**
+     * 提交审核
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel editCheck(Integer invoiceOrderId, Enum<Status> currentStatus);
+
+    /**
+     * 审核通过
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel checkPass(Integer invoiceOrderId, Enum<Status> currentStatus);
+
+    /**
+     * 审核拒绝
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel checkRefuse(Integer invoiceOrderId, Enum<Status> currentStatus);
+
+    /**
+     * 审核通过后取消
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel passCancel(Integer invoiceOrderId, Enum<Status> currentStatus);
+
+    /**
+     * 审核拒绝后取消
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel refuseCancel(Integer invoiceOrderId, Enum<Status> currentStatus);
+
+    /**
+     * 编辑取消
+     *
+     * @param invoiceOrderId 发货单id
+     * @param currentStatus  当前状态
+     * @return 返回模组结果
+     */
+    public abstract ResultModel editCancel(Integer invoiceOrderId, Enum<Status> currentStatus);
+}
+
+
+```
+创建具体类继承自state并实现其方法
+```
+public class CheckState extends State {
+
+    @Override
+    public ResultModel editCheck(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return new ResultModel("0000","待审核状态不可重复提审");
+    }
+
+    @Override
+    public ResultModel checkPass(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        InvoiceOrderService.changeStatus(invoiceOrderId,currentStatus,Status.Pass);
+        return new ResultModel("0000","发货单审核状态完成");
+    }
+
+    @Override
+    public ResultModel checkRefuse(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        InvoiceOrderService.changeStatus(invoiceOrderId,currentStatus,Status.Refuse);
+        return new ResultModel("0000","发货单审核被拒绝");
+    }
+
+    @Override
+    public ResultModel passCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return new ResultModel("0000","未审核通过不可取消");
+    }
+
+    @Override
+    public ResultModel refuseCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return new ResultModel("0000","未拒绝审核不可取消");
+    }
+
+    @Override
+    public ResultModel editCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return new ResultModel("0000","未拒绝审核不可取消");
+    }
+}
+
+```
+提供具体逻辑处理类
+```
+public class InvoiceOrderService {
+
+    private static Map<String, Enum<Status>> statusMap = new ConcurrentHashMap<>();
+
+    public static void init(Integer invoiceOrderId, Enum<Status> status) {
+        // 模拟查询发货单信息
+        InvoiceOrderInfo invoiceOrderInfo = new InvoiceOrderInfo();
+        invoiceOrderInfo.setInvoiceOrderId(invoiceOrderId);
+        invoiceOrderInfo.setInvoiceOrderName("深圳发往杭州货件");
+        invoiceOrderInfo.setStatus(status);
+        invoiceOrderInfo.setCreateDate(new Date());
+        invoiceOrderInfo.setUpdateDate(new Date());
+        statusMap.put(String.valueOf(invoiceOrderId), status);
+    }
+
+    /**
+     * 查询发货单信息
+     *
+     * @param invoiceOrderId 发货单id
+     * @return 查询结果
+     */
+    public static InvoiceOrderInfo queryInvoiceOrderInfo(Integer invoiceOrderId) {
+        // 模拟查询发货单信息
+        InvoiceOrderInfo invoiceOrderInfo = new InvoiceOrderInfo();
+        invoiceOrderInfo.setInvoiceOrderId(invoiceOrderId);
+        invoiceOrderInfo.setInvoiceOrderName("深圳发往杭州货件");
+        invoiceOrderInfo.setStatus(statusMap.get(invoiceOrderId.toString()));
+        invoiceOrderInfo.setCreateDate(new Date());
+        invoiceOrderInfo.setUpdateDate(new Date());
+        return invoiceOrderInfo;
+    }
+
+    /**
+     * 变更状态
+     *
+     * @param invoiceOrderId 发货单id
+     * @param beforeStatus   变更前状态
+     * @param afterStatus    变更后状态
+     */
+    public static synchronized void changeStatus(Integer invoiceOrderId, Enum<Status> beforeStatus, Enum<Status> afterStatus) {
+        if (!beforeStatus.equals(statusMap.get(invoiceOrderId.toString()))) {
+            return;
+        }
+        statusMap.put(invoiceOrderId.toString(), afterStatus);
+    }
+}
+```
+创建一个状态控制器用于统一处理各种状态的流转控制
+```
+public class StateHandler {
+
+    private Map<Enum<Status>,State> stateMap = new ConcurrentHashMap<>();
+
+    public StateHandler(){
+        stateMap.put(Status.Editing,new EditingState()); // 创建/编辑
+        stateMap.put(Status.Check,new CheckState()); // 待审核
+        stateMap.put(Status.Pass,new PassState()); // 审核通过
+        stateMap.put(Status.Refuse,new RefuseState()); // 审核被拒绝
+    }
+
+    public ResultModel editCheck(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).editCheck(invoiceOrderId,currentStatus);
+    }
+
+    public ResultModel editCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).editCancel(invoiceOrderId,currentStatus);
+    }
+
+    public ResultModel checkPass(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).checkPass(invoiceOrderId,currentStatus);
+    }
+
+    public ResultModel checkRefuse(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).checkRefuse(invoiceOrderId,currentStatus);
+    }
+
+    public ResultModel passCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).passCancel(invoiceOrderId,currentStatus);
+    }
+
+    public ResultModel refuseCancel(Integer invoiceOrderId, Enum<Status> currentStatus) {
+        return stateMap.get(currentStatus).refuseCancel(invoiceOrderId,currentStatus);
+    }
+}
+
+```
+创建一个测试函数
+```
+@Slf4j
+public class Main {
+//    public static void main(String[] args) {
+//        // 初始化数据
+//        Integer invoiceOrderId = 100001;
+//        InvoiceOrderService.init(invoiceOrderId,Status.Editing);
+//
+//        InvoiceOrderChangeStatusController controller = new InvoiceOrderChangeStatusController();
+//        ResultModel resultModel = controller.changeStatus(invoiceOrderId, Status.Editing, Status.Check);
+//        log.info("测试结果(创建/编辑中To审核中)：{}",JSON.toJSONString(resultModel));
+//
+//        ResultModel model = controller.changeStatus(invoiceOrderId, Status.Editing, Status.Pass);
+//        log.info("测试结果(创建/编辑中To审核通过)：{}",JSON.toJSONString(model));
+//    }
+
+    public static void main(String[] args) {
+        // 初始化数据
+        Integer invoiceOrderId1 = 100001;
+        InvoiceOrderService.init(invoiceOrderId1,Status.Editing);
+
+        StateHandler handler1 = new StateHandler();
+        ResultModel model1 = handler1.editCheck(invoiceOrderId1, Status.Editing);
+
+        log.info("测试结果(编辑中To待审核)：{}", JSON.toJSONString(model1));
+        log.info("活动信息：{} 状态：{}", JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId1)), JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId1).getStatus()));
+
+
+        // 初始化数据
+        Integer invoiceOrderId2 = 100002;
+        InvoiceOrderService.init(invoiceOrderId2,Status.Check);
+
+        StateHandler handler2 = new StateHandler();
+        ResultModel model2 = handler2.checkPass(invoiceOrderId2, Status.Check);
+
+        log.info("测试结果(待审核To审核通过)：{}", JSON.toJSONString(model2));
+        log.info("活动信息：{} 状态：{}", JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId2)), JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId2).getStatus()));
+
+        Integer invoiceOrderId3 = 100003;
+        InvoiceOrderService.init(invoiceOrderId3,Status.Pass);
+
+        StateHandler handler3 = new StateHandler();
+        ResultModel model3 = handler3.passCancel(invoiceOrderId3, Status.Pass);
+
+        log.info("测试结果(审核通过To取消)：{}", JSON.toJSONString(model3));
+        log.info("活动信息：{} 状态：{}", JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId3)), JSON.toJSONString(InvoiceOrderService.queryInvoiceOrderInfo(invoiceOrderId3).getStatus()));
+    }
+}
+
+
+```
+
+输出结果
+
+```
+15:10:47.763 [main] INFO com.savoidage.designmodel.status.example.Main - 测试结果(编辑中To待审核)：{"code":"0000","message":"待审核状态更改成功"}
+15:10:47.771 [main] INFO com.savoidage.designmodel.status.example.Main - 活动信息：{"createDate":1604473847766,"invoiceOrderId":100001,"invoiceOrderName":"深圳发往杭州货件","status":"Check","updateDate":1604473847766} 状态："Check"
+15:10:47.772 [main] INFO com.savoidage.designmodel.status.example.Main - 测试结果(待审核To审核通过)：{"code":"0000","message":"发货单审核状态完成"}
+15:10:47.772 [main] INFO com.savoidage.designmodel.status.example.Main - 活动信息：{"createDate":1604473847772,"invoiceOrderId":100002,"invoiceOrderName":"深圳发往杭州货件","status":"Pass","updateDate":1604473847772} 状态："Pass"
+15:10:47.772 [main] INFO com.savoidage.designmodel.status.example.Main - 测试结果(审核通过To取消)：{"code":"0000","message":"状态取消成功"}
+15:10:47.772 [main] INFO com.savoidage.designmodel.status.example.Main - 活动信息：{"createDate":1604473847772,"invoiceOrderId":100003,"invoiceOrderName":"深圳发往杭州货件","status":"cancel","updateDate":1604473847772} 状态："cancel"
+```
